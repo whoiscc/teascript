@@ -52,6 +52,12 @@ function While(cond, loop) {
     this.loop = loop;
 }
 
+function Break() {
+}
+
+function Continue() {
+}
+
 function Native(func) {
     this.func = func;
 }
@@ -69,6 +75,8 @@ export {
     If,
     While,
     Native,
+    Break,
+    Continue,
 }
 
 // https://stackoverflow.com/a/14810722
@@ -139,4 +147,12 @@ While.prototype.process = function (teaCup) {
 
 Native.prototype.process = function (teaCup) {
     this.func(teaCup);
+}
+
+Break.prototype.process = function (teaCup) {
+    teaCup.exitLoop();
+}
+
+Continue.prototype.process = function (teaCup) {
+    teaCup.restartLoop();
 }

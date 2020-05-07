@@ -9,8 +9,10 @@ function Scope(receiver, responder, args) {
     this.args = args;
     this.receiver = receiver;
     this.responder = responder;
-    this.exitFlag = false;
+    this.returnFlag = false;
     this.result = null;
+    this.breakFlag = false;
+    this.continueFlag = false;
 }
 
 TeaCup.prototype.currentScope = function () {
@@ -59,7 +61,9 @@ TeaCup.prototype.dispatch = function (receiver, message, args) {
     const scope = new Scope(receiver, responder, args);
     this.scopes.push(scope);
     this.processStats(responder.dispatchTable[message]);
-    assert(scope.exitFlag);
+    assert(scope.returnFlag);
+    assert(!scope.breakFlag);
+    assert(!scope.continueFlag);
     this.scopes.pop();
     return scope.result;
 }
@@ -67,18 +71,35 @@ TeaCup.prototype.dispatch = function (receiver, message, args) {
 TeaCup.prototype.processStats = function (stats) {
     for (let stat of stats) {
         stat.process(this);
-        if (this.currentScope().exitFlag) {
+        if (
+            this.currentScope().returnFlag ||
+            this.currentScope().breakFlag ||
+            this.currentScope().continueFlag
+        ) {
             break;
         }
     }
 }
 
 TeaCup.prototype.exitMethod = function (result) {
-    this.currentScope().exitFlag = true;
+    this.currentScope().returnFlag = true;
     this.currentScope().result = result;
 }
 
 TeaCup.prototype.evaluateCond = function (expr) {
-    return !this.currentScope().exitFlag &&
+    const result = !this.currentScope().returnFlag && !this.currentScope().breakFlag &&
         this.dispatch(expr.evaluate(this), '$nativeBool', []);
+    // this must not unset the two flags in if condition
+    // if either flag is set, the following if is skipped
+    this.currentScope().breakFlag = false;
+    this.currentScope().continueFlag = false;
+    return result;
+}
+
+TeaCup.prototype.exitLoop = function () {
+    this.currentScope().breakFlag = true;
+}
+
+TeaCup.prototype.restartLoop = function () {
+    this.currentScope().continueFlag = true;
 }

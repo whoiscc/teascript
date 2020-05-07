@@ -140,3 +140,6 @@ test('if and while stats', () => {
     expect(cup.dispatch(object, 'testFunc', [10, 20])).toEqual(10);
     expect(cup.dispatch(object, 'testFunc', [20, 10])).toEqual(11);
 })
+
+test('break and continue - too complex to test without frontend', () => {
+})
