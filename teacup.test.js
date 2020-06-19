@@ -1,6 +1,7 @@
 import TeaCup from "./teacup";
 import {
-    Dispatch, If,
+    Dispatch,
+    If,
     LoadArg,
     LoadContext,
     LoadName,
@@ -9,7 +10,8 @@ import {
     Return,
     Spawn,
     StoreName,
-    StoreState, While
+    StoreState,
+    While
 } from "./syntax";
 
 test('create TeaCup instance', () => {
